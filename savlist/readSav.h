@@ -1,3 +1,7 @@
+/*
+SAVList (C) 2005 Tatsuhiko Shoji
+The sources for SAVList are distributed under the MIT open source license
+*/
 #ifndef READSAV_H
 #define READSAV_H
 

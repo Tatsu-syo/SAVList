@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+SAVList (C) 2005 Tatsuhiko Shoji
+The sources for SAVList are distributed under the MIT open source license
+-->
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 <assemblyIdentity
     version="1.32.0.5"

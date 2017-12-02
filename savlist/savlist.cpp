@@ -10,6 +10,7 @@ The sources for SAVList are distributed under the MIT open source license
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	"readSav.h"
+#include	"savlist.h"
 #include	"resource.h"
 #include	"verDialog.h"
 
@@ -52,6 +53,7 @@ HWND hList;	// リスト部分のハンドル
 HWND hStatus;	// ステータスバーのウインドウハンドル
 HINSTANCE hInst;	// インスタンスハンドル
 bool readFlag = false;
+char *inoutDir;
 
 int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int nCmdShow)
 {
@@ -63,8 +65,8 @@ int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int n
 
     dwver = GetVersion();
 	winVer = LOBYTE(dwver);
-	if (winVer < 4){	// Windows NT 3.xxチェック
-		MessageBox(NULL,"Windows 95/NT4以降のWindowsでのみ\n動作します。","お詫び",MB_OK);
+	if (winVer < 5){	// Windows バージョンチェック
+		MessageBox(NULL,"Windows 2000以降のWindowsでのみ\n動作します。","お詫び",MB_OK);
 		return(0);
 	}
 	minorVer = HIBYTE(dwver);
@@ -85,6 +87,8 @@ int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int n
 		return FALSE;
 	}
 
+	inoutDir = (char *)malloc(MAX_PATH);
+	inoutDir[0] = '\0';
 	hAccel = LoadAccelerators(hCurInst,MAKEINTRESOURCE(IDR_ACCELERATOR1));
 	
 	// メッセージ処理
@@ -94,6 +98,9 @@ int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int n
 			DispatchMessage(&msg);
 		}
 	}
+
+	free(inoutDir);
+
 	return (int)msg.wParam;
 	
 }
@@ -147,6 +154,15 @@ BOOL InitInstance(HINSTANCE hInst,int nCmdShow)
 	return TRUE;
 }
 
+/**
+ * ウインドウプローシジャ
+ *
+ * @param hWnd 対象ウインドウハンドル
+ * @param msg メッセージ
+ * @param wp WPARAM
+ * @param lp LPARAM
+ * @return 実行結果
+ */
 LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 {
 	RECT rc;
@@ -174,6 +190,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 			}
 		break;
 		case WM_SIZE:
+			// ウインドウサイズ調整に伴うリストビューの調整
 			RECT statusRect;
 			SendMessage(hStatus,msg,wp,lp);
 			GetWindowRect(hStatus,&statusRect);
@@ -217,7 +234,15 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 	return 0;
 }
 
-//
+/**
+ * WM_COMMAND処理ルーチン
+ *
+ * @param hWnd 対象ウインドウハンドル
+ * @param msg メッセージ
+ * @param wp WPARAM
+ * @param lp LPARAM
+ * @return 実行結果
+ */
 LRESULT CommandProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 {
 	switch(LOWORD(wp)){
@@ -413,6 +438,9 @@ void transferFiles(void)
 	ofn.lpstrFile = gotFileName;
 	ofn.nMaxFile = 10240;
 	ofn.lpstrTitle = "転送するファイルを選択";
+	if (inoutDir[0]) {
+		ofn.lpstrInitialDir = inoutDir;
+	}
 
 	if (GetOpenFileName(&ofn)){
 		p = gotFileName + ofn.nFileOffset;
@@ -426,6 +454,7 @@ void transferFiles(void)
 				if (result){
 					putTransferErrorMessage(result);
 				}
+				getDirname(path);
 			}else{
 				// ファイル名が2つ以上のときは
 				// ディレクトリ\0ファイル名1\0(略)\0\0
@@ -439,6 +468,7 @@ void transferFiles(void)
 						putTransferErrorMessage(result);
 						break;
 					}
+					getDirname(path);
 
 					while(*p){
 						p++;
@@ -458,7 +488,26 @@ void transferFiles(void)
 	free(gotFileName);
 }
 
-/* ファイル転送時のエラーメッセージ表示 */
+/**
+ * ディレクトリ名を取得する。
+ *
+ * @param path 選択したディレクトリ
+ */
+void getDirname(char *path)
+{
+	char drive[_MAX_DRIVE],dir[_MAX_DIR];
+	int len;
+
+	_splitpath(path, drive,dir, NULL, NULL);
+	sprintf(inoutDir, "%s%s", drive, dir);
+
+}
+
+/**
+ * ファイル転送時のエラーメッセージ表示
+ *
+ * @param result 処理の結果起こったエラー情報
+ */
 void putTransferErrorMessage(int result)
 {
 	if (result == NO_DISKSPACE){
@@ -496,6 +545,7 @@ void extractFiles(void)
 	if (dirselect(hWndMain,buf)){
 		return;
 	}
+	strcpy(inoutDir, buf);
 
 	// 選択されたファイル数を見て、ファイルを展開していく。
 	count = ListView_GetItemCount(hList);

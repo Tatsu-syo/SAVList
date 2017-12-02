@@ -1,6 +1,16 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "savlist", "savlist\savlist.vcproj", "{1E6C264B-C37F-43AD-9E23-C829914D6569}"
+	ProjectSection(ProjectDependencies) = postProject
+		{910BBA0C-7487-42BA-8DC8-35EB06398129} = {910BBA0C-7487-42BA-8DC8-35EB06398129}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "file2sav", "file2sav\file2sav.vcproj", "{A7A8442A-6F51-42FD-B433-54C8F68EC4CA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{910BBA0C-7487-42BA-8DC8-35EB06398129} = {910BBA0C-7487-42BA-8DC8-35EB06398129}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common\common.vcproj", "{910BBA0C-7487-42BA-8DC8-35EB06398129}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,6 +22,14 @@ Global
 		{1E6C264B-C37F-43AD-9E23-C829914D6569}.Debug|Win32.Build.0 = Debug|Win32
 		{1E6C264B-C37F-43AD-9E23-C829914D6569}.Release|Win32.ActiveCfg = Release|Win32
 		{1E6C264B-C37F-43AD-9E23-C829914D6569}.Release|Win32.Build.0 = Release|Win32
+		{A7A8442A-6F51-42FD-B433-54C8F68EC4CA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A7A8442A-6F51-42FD-B433-54C8F68EC4CA}.Debug|Win32.Build.0 = Debug|Win32
+		{A7A8442A-6F51-42FD-B433-54C8F68EC4CA}.Release|Win32.ActiveCfg = Release|Win32
+		{A7A8442A-6F51-42FD-B433-54C8F68EC4CA}.Release|Win32.Build.0 = Release|Win32
+		{910BBA0C-7487-42BA-8DC8-35EB06398129}.Debug|Win32.ActiveCfg = Debug|Win32
+		{910BBA0C-7487-42BA-8DC8-35EB06398129}.Debug|Win32.Build.0 = Debug|Win32
+		{910BBA0C-7487-42BA-8DC8-35EB06398129}.Release|Win32.ActiveCfg = Release|Win32
+		{910BBA0C-7487-42BA-8DC8-35EB06398129}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

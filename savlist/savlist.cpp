@@ -14,28 +14,6 @@ The sources for SAVList are distributed under the MIT open source license
 #include	"resource.h"
 #include	"verDialog.h"
 
-LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
-ATOM InitApp(HINSTANCE);
-BOOL InitInstance(HINSTANCE,int);
-LRESULT CommandProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp);
-
-HWND MakeMyList(HWND);
-void InsertMyColumn(HWND);
-
-void openSavFileSelect(void);
-void openSavFile(char *filename);
-void transferFiles(void);
-void putTransferErrorMessage(int result);
-void extractFiles(void);
-int dirselect(HWND hWnd,char *buf);
-void queryDeleteFiles(void);
-void queryLFNKill(void);
-void directoryUpKey(void);
-void selectSubDirectory(void);
-void setStatusBarInfo(void);
-void displayHelpFile(void);
-void versionDialog(void);
-
 #define EXE_NAME "savlist.exe"
 #define MAN_NAME "SLhelp.html"
 
@@ -53,7 +31,8 @@ HWND hList;	// リスト部分のハンドル
 HWND hStatus;	// ステータスバーのウインドウハンドル
 HINSTANCE hInst;	// インスタンスハンドル
 bool readFlag = false;
-char *inoutDir;
+char *inoutDir;	// ファイル転送・取り出しディレクトリの起点
+char *savDir;	// 仮想フロッピーディスクファイル選択の起点
 
 int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int nCmdShow)
 {
@@ -88,7 +67,18 @@ int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int n
 	}
 
 	inoutDir = (char *)malloc(MAX_PATH);
+	if (inoutDir == NULL) {
+		return FALSE;
+	}
 	inoutDir[0] = '\0';
+
+	savDir = (char *)malloc(MAX_PATH);
+	if (savDir == NULL) {
+		free(inoutDir);
+		return FALSE;
+	}
+	savDir[0] = '\0';
+
 	hAccel = LoadAccelerators(hCurInst,MAKEINTRESOURCE(IDR_ACCELERATOR1));
 	
 	// メッセージ処理
@@ -99,6 +89,7 @@ int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int n
 		}
 	}
 
+	free(savDir);
 	free(inoutDir);
 
 	return (int)msg.wParam;
@@ -345,13 +336,9 @@ void InsertMyColumn(HWND hList)
 	return;
 }
 
-/*
-	仮想フロッピーディスクファイル選択ダイアログを出す。
-	引数
-		なし
-	戻り値
-		なし
-*/
+/**
+ * 仮想フロッピーディスクファイル選択ダイアログを出す。
+ */
 void openSavFileSelect(void)
 {
 	OPENFILENAME ofn;
@@ -371,9 +358,13 @@ void openSavFileSelect(void)
 	ofn.lpstrFile = GotFileName;
 	ofn.nMaxFile = 256;
 	ofn.lpstrTitle = "仮想フロッピーディスクファイルを開く";
+	if (savDir[0] != '\0') {
+		ofn.lpstrInitialDir = savDir;
+	}
 
 	if (GetOpenFileName(&ofn)){
 		openSavFile(GotFileName);
+		getSavDir(GotFileName);
 	}
 }
 
@@ -500,6 +491,21 @@ void getDirname(char *path)
 
 	_splitpath(path, drive,dir, NULL, NULL);
 	sprintf(inoutDir, "%s%s", drive, dir);
+
+}
+
+/**
+ * SAVファイルのディレクトリ名を取得する。
+ *
+ * @param path 選択したディレクトリ
+ */
+void getSavDir(char *path)
+{
+	char drive[_MAX_DRIVE],dir[_MAX_DIR];
+	int len;
+
+	_splitpath(path, drive,dir, NULL, NULL);
+	sprintf(savDir, "%s%s", drive, dir);
 
 }
 

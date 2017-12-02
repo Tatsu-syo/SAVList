@@ -1,3 +1,7 @@
+/*
+file2sav (C) 2005 Tatsuhiko Shoji
+The sources for file2sav are distributed under the MIT open source license
+*/
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<windows.h>

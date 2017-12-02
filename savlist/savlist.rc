@@ -53,7 +53,7 @@ FONT 10, "‚l‚r ‚oƒSƒVƒbƒN", 400, 0, 128
 {
     DEFPUSHBUTTON   "OK", IDOK, 178, 28, 50, 14
     PUSHBUTTON      "Support", IDSUPPORT, 178, 7, 50, 14
-    LTEXT           "SAVList Version 1.00", IDC_STATIC, 42, 7, 77, 8, SS_LEFT
+    LTEXT           "SAVList Version 1.01", IDC_STATIC, 42, 7, 77, 8, SS_LEFT
     LTEXT           "Copyright (C) 2003-2005 Tatsu", IDC_STATIC, 42, 23, 103, 8, SS_LEFT
     ICON            IDI_ICON1, IDC_STATIC, 13, 10, 9, 10, SS_ICON
 }
@@ -86,8 +86,8 @@ IDI_ICON1          ICON           "icon1.ico"
 //
 LANGUAGE LANG_JAPANESE, SUBLANG_SYS_DEFAULT
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION     1,0,0,1
-    PRODUCTVERSION  1,0,0,1
+    FILEVERSION     1,0,1,0
+    PRODUCTVERSION  1,0,1,0
     FILEOS          VOS__WINDOWS32
     FILETYPE        VFT_APP
     FILESUBTYPE     VFT2_UNKNOWN
@@ -99,12 +99,12 @@ VS_VERSION_INFO VERSIONINFO
         BLOCK "041104B0"
         {
             VALUE "FileDescription", "SavList"
-            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "FileVersion", "1, 0, 1, 0"
             VALUE "InternalName", "savlist"
-            VALUE "LegalCopyright", "Copyright (C) 2003-2005 Tatsu"
+            VALUE "LegalCopyright", "Copyright (C) 2003-2005,2017 Tatsu"
             VALUE "OriginalFilename", "savlist.exe"
             VALUE "ProductName", "SavList"
-            VALUE "ProductVersion", "1, 0, 0, 1"
+            VALUE "ProductVersion", "1, 0, 1, 0"
         }
     }
     BLOCK "VarFileInfo"

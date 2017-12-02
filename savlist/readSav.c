@@ -125,8 +125,13 @@ void cleanup(void)
 	}
 }
 
-/* 指定されたファイルの情報をディレクトリにセットする。 */
-/* ここだけはWindowsに依存する。 */
+/**
+ * 指定されたファイルの情報をディレクトリにセットする。
+ * ここだけはWindowsに依存する。
+ *
+ * @param d ディレクトリ情報
+ * @filename ディレクトリ情報構造体に設定するファイル名
+ */
 int setupDirectory(struct dirEntry *d,char *filename)
 {
 	HANDLE hFind;
@@ -307,7 +312,12 @@ int checkEmptyEntry(struct dirEntry *d)
 	return empty;
 }
 
-/* ファイルの書き込みを行う。 */
+/**
+ * ファイルの書き込みを行う。
+ *
+ * @param filename 書き込むファイル名
+ * @return 書き込み結果 0:成功 0以外:失敗
+ */
 int writeFile(char *filename)
 {
 	struct dirEntry d;
@@ -508,7 +518,44 @@ int extractFile(char *dir,int listviewEntry)
 	fclose(fpo);
 	free(clusterBuf);
 
+	/* タイムスタンプを設定する。 */
+	setTimeStamp(&d, buf);
+
 	return 0;
+}
+
+/**
+ * タイムスタンプをディスクイメージのファイルから設定する。
+ *
+ * @param d ディレクトリエントリ
+ * @param filename 設定対象ファイル
+ */
+void setTimeStamp(struct dirEntry *d, char *filename)
+{
+	HANDLE hFile;
+	FILETIME fileTime;
+	SYSTEMTIME sysTime;
+	FILETIME localFileTime;
+
+	memset(&sysTime, 0,sizeof(SYSTEMTIME));
+
+	hFile = CreateFile(filename,
+		GENERIC_READ | GENERIC_WRITE,
+		0,
+		NULL,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		0);
+	if (hFile == INVALID_HANDLE_VALUE) {
+		return;
+	}
+	DosDateTimeToFileTime(d->date, d->time, &fileTime);
+	
+	LocalFileTimeToFileTime(&fileTime, &localFileTime);
+
+	SetFileTime(hFile, NULL, NULL, &localFileTime);
+	CloseHandle(hFile);
+
 }
 
 /* ディレクトリを読み込む */

@@ -5,6 +5,8 @@ The sources for SAVList are distributed under the MIT open source license
 #ifndef READSAV_H
 #define READSAV_H
 
+#include "fatFs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +26,7 @@ int upDirectory(HWND hList);
 void enterDirectory(HWND hList,int listviewEntry);
 void deleteSelectedFiles(HWND hList);
 void deleteLongFilename(HWND hList);
+void setTimeStamp(struct dirEntry *d, char *filename);
 
 struct SavStatus {
 	unsigned long files;

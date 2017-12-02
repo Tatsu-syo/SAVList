@@ -143,7 +143,12 @@ void getDirectory(struct dirEntry *dir,unsigned long no)
 	dir->size = size;
 }
 
-/* ディレクトリエントリの内容をメモリにセットする。 */
+/**
+ * ディレクトリエントリの内容をメモリにセットする。
+ *
+ * @param エントリ情報
+ * @param 設定するエントリの位置
+ */
 void setDirectory(struct dirEntry *dir,unsigned long no)
 {
 	char *p;
@@ -152,34 +157,41 @@ void setDirectory(struct dirEntry *dir,unsigned long no)
 
 	p = DirEntryBuf + no * 32;
 	
+	/* ファイル名 */
 	for (i = 0;i < 8;i++){
 		*p = dir->filename[i];
 		p++;
 	}
 	
+	/* 拡張子 */
 	for (i = 0;i < 3;i++){
 		*p = dir->ext[i];
 		p++;
 	}
+	/* 属性 */
 	*p = (char)dir->attr;
 	p++;
 	p += 10;
 
+	/* 日付 */
 	*p = (char)(dir->time & 0xff);
 	p++;
 	*p = (char)((dir->time >> 8) & 0xff);
 	p++;
 
+	/* 時刻 */
 	*p = (char)(dir->date & 0xff);
 	p++;
 	*p = (char)((dir->date >> 8) & 0xff);
 	p++;
 
+	/* 先頭クラスタ番号 */
 	*p = (char)(dir->cluster & 0xff);
 	p++;
 	*p = (char)((dir->cluster >> 8) & 0xff);
 	p++;
 
+	/* ファイルサイズ */
 	stemp = dir->size;
 	for (i = 0;i < 4;i++){
 		*p = (char)(stemp & 0xff);

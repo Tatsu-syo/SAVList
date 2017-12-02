@@ -58,26 +58,29 @@ int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int n
 
 	hInst = hCurInst;
 	
+	savDir = (char *)malloc(MAX_PATH);
+	if (savDir == NULL) {
+		return FALSE;
+	}
+	savDir[0] = '\0';
+
 	if (!InitApp(hCurInst)){
+		free(savDir);
 		return FALSE;
 	}
 	
 	if (!InitInstance(hCurInst,nCmdShow)){
+		free(savDir);
 		return FALSE;
 	}
 
 	inoutDir = (char *)malloc(MAX_PATH);
 	if (inoutDir == NULL) {
+		free(savDir);
 		return FALSE;
 	}
 	inoutDir[0] = '\0';
 
-	savDir = (char *)malloc(MAX_PATH);
-	if (savDir == NULL) {
-		free(inoutDir);
-		return FALSE;
-	}
-	savDir[0] = '\0';
 
 	hAccel = LoadAccelerators(hCurInst,MAKEINTRESOURCE(IDR_ACCELERATOR1));
 	
@@ -178,6 +181,11 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 			//InsertMyItem(hList);
 			if (__argc > 1){
 				openSavFile(__argv[1]);
+				if ((strstr(__argv[1], ":\\") != NULL) || (__argv[1][1] == '\\')) {
+					getSavDir(__argv[1]);
+				} else {
+					GetCurrentDirectory(MAX_PATH, savDir);
+				}
 			}
 		break;
 		case WM_SIZE:

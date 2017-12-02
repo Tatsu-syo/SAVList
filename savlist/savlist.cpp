@@ -739,6 +739,9 @@ void setStatusBarInfo(void)
 	SetWindowText(hStatus,buf);
 }
 
+/**
+ * ヘルプファイルを表示する
+ */
 void displayHelpFile(void)
 {
 	DWORD result;
@@ -766,6 +769,9 @@ void displayHelpFile(void)
 	inst = ShellExecute(NULL,"open",helpFile,NULL,NULL,SW_SHOWNORMAL);
 }
 
+/**
+ * バージョン表示ダイアログを表示する
+ */
 void versionDialog(void)
 {
 	// Windows 2000/XPでウインドウを透明化する。

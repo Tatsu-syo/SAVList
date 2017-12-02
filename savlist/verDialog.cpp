@@ -11,7 +11,7 @@ The sources for SAVList are distributed under the MIT open source license
 #include	"readSav.h"
 #include	"resource.h"
 
-#define MYWEB_URL "http://homepage3.nifty.com/Tatsu_syo/"
+#define MYWEB_URL "http://tatsu.life.coocan.jp/"
 
 BOOL CALLBACK VerDialogProc(HWND hDlg,UINT msg,WPARAM wp,LPARAM lp)
 {

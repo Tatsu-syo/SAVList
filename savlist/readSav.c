@@ -623,6 +623,9 @@ void readDirectory(unsigned long startCluster)
 	}
 }
 
+/**
+ * ディレクトリの状態(ファイル数・ディレクトリ数)を算出する。
+ */
 void getSavStatus(struct SavStatus *status)
 {
 	int i;
@@ -743,15 +746,24 @@ void refreshDir(HWND hList)
 		/* ファイル名 */
 		memset(buf,0x00,32);
 		memcpy(buf,d.filename,8);
-		if (d.ext[0] != ' '){
-			buf[8] = '.';
-			memcpy(buf + 9,d.ext,3);
-		}
 
 		item.pszText = buf;
 		item.iItem = pos;
 		item.iSubItem = 1;
 		ListView_SetItem(hList,&item);
+
+		memset(buf,0x00,32);
+		if (d.ext[0] != ' '){
+			buf[0] = '.';
+			memcpy(buf + 1,d.ext,3);
+		} else {
+			strcpy(buf,"    ");
+		}
+		item.pszText = buf;
+		item.iItem = pos;
+		item.iSubItem = 2;
+		ListView_SetItem(hList,&item);
+
 
 		/* ファイルサイズ */
 		if (d.attr & 0x10){
@@ -765,7 +777,7 @@ void refreshDir(HWND hList)
 
 		item.pszText = buf;
 		item.iItem = pos;
-		item.iSubItem = 2;
+		item.iSubItem = 3;
 		ListView_SetItem(hList,&item);
 
 		/* 更新時刻 */
@@ -779,7 +791,7 @@ void refreshDir(HWND hList)
 
 		item.pszText = buf;
 		item.iItem = pos;
-		item.iSubItem = 3;
+		item.iSubItem = 4;
 		ListView_SetItem(hList,&item);
 
 		pos++;
@@ -940,7 +952,9 @@ void deleteSelectedFiles(HWND hList)
 	flushSavfile();
 }
 
-/* サブディレクトリの中に入る */
+/**
+ * ロングファイル名を削除する。 
+ */
 void deleteLongFilename(HWND hList)
 {
 	int i,pos;

@@ -145,7 +145,7 @@ BOOL InitInstance(HINSTANCE hInst,int nCmdShow)
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
-			475,
+			510,
 			400,
 			HWND_DESKTOP,
 			NULL,
@@ -339,20 +339,25 @@ void InsertMyColumn(HWND hList)
 	lvcol.iSubItem = 0;
 	ListView_InsertColumn(hList,0,&lvcol);
 
-	lvcol.cx = 130;
+	lvcol.cx = 100;
 	lvcol.pszText = "ファイル名";
 	lvcol.iSubItem = 1;
 	ListView_InsertColumn(hList,1,&lvcol);
 	
-	lvcol.cx = 90;
-	lvcol.pszText = "サイズ";
+	lvcol.cx = 60;
+	lvcol.pszText = "拡張子";
 	lvcol.iSubItem = 2;
 	ListView_InsertColumn(hList,2,&lvcol);
-
-	lvcol.cx = 130;
-	lvcol.pszText = "更新時刻";
+	
+	lvcol.cx = 80;
+	lvcol.pszText = "サイズ";
 	lvcol.iSubItem = 3;
 	ListView_InsertColumn(hList,3,&lvcol);
+
+	lvcol.cx = 150;
+	lvcol.pszText = "更新時刻";
+	lvcol.iSubItem = 4;
+	ListView_InsertColumn(hList,4,&lvcol);
 	
 	return;
 }

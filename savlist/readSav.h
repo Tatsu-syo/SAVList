@@ -35,6 +35,8 @@ struct SavStatus {
 	unsigned long maxSize;
 };
 
+extern int listViewEntrys;
+
 #ifdef __cplusplus
 }
 #endif

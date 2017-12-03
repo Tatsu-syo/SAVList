@@ -34,6 +34,15 @@ bool readFlag = false;
 char *inoutDir;	// ファイル転送・取り出しディレクトリの起点
 char *savDir;	// 仮想フロッピーディスクファイル選択の起点
 
+/**
+ * メインルーチン
+ *
+ * @param hCurInst インスタンスハンドル
+ * @param hPrevInst 親のインスタンスハンドル
+ * @param lpsCmdLine コマンドライン
+ * @param nCmdShow 表示状態
+ * @return 実行結果
+ */
 int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int nCmdShow)
 {
 	MSG msg;
@@ -99,7 +108,11 @@ int WINAPI WinMain(HINSTANCE hCurInst,HINSTANCE hPrevInst,LPSTR lpsCmdLine,int n
 	
 }
 
-// メインウインドウのウインドウクラスを登録する。
+/**
+ * メインウインドウのウインドウクラスを登録する。
+ *
+ * @param hInst インスタンスハンドル
+ */
 ATOM InitApp(HINSTANCE hInst)
 {
 	WNDCLASSEX wc;
@@ -636,7 +649,17 @@ void queryDeleteFiles(void)
 	result = MessageBox(hWndMain,"選択したファイルを削除しますか？","確認"
 		,MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
 
-	if (result == IDYES){
+	if (result == IDYES) {
+		// 最初に選択されていたところを取得する。
+		int firstSelected;
+		for (int i = 0;i < listViewEntrys;i++){
+			UINT state = ListView_GetItemState(hList, i, LVIS_FOCUSED);
+			if (state & LVIS_FOCUSED){
+				firstSelected = i;
+				break;
+			}
+		}
+
 		deleteSelectedFiles(hList);
 
 		// ステータスバーを更新する。
@@ -644,10 +667,20 @@ void queryDeleteFiles(void)
 		// リストビューに反映する。
 		// ディレクトリを再表示する。
 		refreshDir(hList);
+
+		// カーソル表示位置を調整する。
+		int items = ListView_GetItemCount(hList);
+		int newPos;
+		if (firstSelected >= items) {
+			newPos = items - 1;
+		} else {
+			newPos = firstSelected;
+		}
+		ListView_SetItemState(hList, newPos, 1, LVIS_FOCUSED);
+
 		UpdateWindow(hList);
 		UpdateWindow(hStatus);
 	}
-	ListView_SetItemState(hList,0,1,LVIS_FOCUSED);
 	SetFocus(hList);
 }
 

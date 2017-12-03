@@ -11,7 +11,7 @@ Visual Studio 2010以降でのコンパイルも可能と思われます。
 [ファイル]
 ReadMe.txt:本ファイルです。
 LICENSE : MITライセンスの条文です。
-imex.sln : Visual Studio 2008用ソリューションファイルです。
+SAVList.sln : Visual Studio 2008用ソリューションファイルです。
 savlist\savlist.vcproj : SAVListのVisual Studio 2008用プロジェクトファイルです。
 その他のファイル : SAVList自身のソースファイルです。
 
@@ -22,7 +22,7 @@ savlist\savlist.vcproj : SAVListのVisual Studio 2008用プロジェクトファ
 リリース版はsavlist\Releaseフォルダに生成されます。
 
 [ライセンス]
-MITライセンス(http://opensource.org/licenses/mit-license.php)に従います。
+MITライセンス( http://opensource.org/licenses/mit-license.php )に従います。
 
 [作者]
 庄子 達彦(Tatsu)

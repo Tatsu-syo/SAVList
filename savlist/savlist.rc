@@ -50,7 +50,7 @@ FONT 10, "‚l‚r ‚oƒSƒVƒbƒN", 400, 0, 128
 {
     DEFPUSHBUTTON   "OK", IDOK, 178, 28, 50, 14, 0, WS_EX_LEFT
     PUSHBUTTON      "Support", IDSUPPORT, 178, 7, 50, 14, 0, WS_EX_LEFT
-    LTEXT           "SAVList Version 1.01", IDC_STATIC, 42, 7, 77, 8, SS_LEFT, WS_EX_LEFT
+    LTEXT           "SAVList Version 1.02", IDC_STATIC, 42, 7, 77, 8, SS_LEFT, WS_EX_LEFT
     LTEXT           "Copyright (C) 2003-2005,2017 Tatsu", IDC_STATIC, 42, 23, 120, 9, SS_LEFT, WS_EX_LEFT
     ICON            IDI_ICON1, IDC_STATIC, 13, 10, 9, 10, SS_ICON, WS_EX_LEFT
 }
@@ -100,7 +100,7 @@ VS_VERSION_INFO VERSIONINFO
         BLOCK "041104B0"
         {
             VALUE "FileDescription", "SavList"
-            VALUE "FileVersion", "1, 0, 1, 0"
+            VALUE "FileVersion", "1, 0, 2, 0"
             VALUE "InternalName", "savlist"
             VALUE "LegalCopyright", "Copyright (C) 2003-2005,2017 Tatsu"
             VALUE "OriginalFilename", "savlist.exe"

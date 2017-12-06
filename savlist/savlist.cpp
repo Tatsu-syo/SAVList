@@ -174,6 +174,9 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 {
 	RECT rc;
 	LPNMHDR nm;
+	LV_COLUMN lvcol;
+	LV_DISPINFO *lvinfo;
+	NM_LISTVIEW *pNMLV;
 	
 	switch (msg){
 		case WM_CREATE:
@@ -214,16 +217,22 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 		case WM_NOTIFY:
 			nm = (LPNMHDR)lp;
 			if (nm->hwndFrom == hList){
-				switch (nm->code) {
-					case NM_DBLCLK:
-						selectSubDirectory();
-						break;
-					case NM_RETURN:
-						selectSubDirectory();
-						break;
-					default:
-						return(DefWindowProc(hWnd,msg,wp,lp));
-						break;
+				lvinfo = (LV_DISPINFO *)lp;
+				if (lvinfo->hdr.code == LVN_COLUMNCLICK) {
+					MessageBox(hWnd, "カラムがクリックされた", "", MB_OK);
+				} else {
+					switch (nm->code) {
+						case NM_DBLCLK:
+							selectSubDirectory();
+							break;
+						case NM_RETURN:
+							selectSubDirectory();
+							break;
+						case LVN_COLUMNCLICK:
+						default:
+							return(DefWindowProc(hWnd,msg,wp,lp));
+							break;
+					}
 				}
 			}else{
 				return(DefWindowProc(hWnd,msg,wp,lp));
@@ -671,7 +680,7 @@ void queryDeleteFiles(void)
 		setStatusBarInfo();
 		// リストビューに反映する。
 		// ディレクトリを再表示する。
-		refreshDir(hList);
+		//refreshDir(hList);
 
 		// カーソル表示位置を調整する。
 		int items = ListView_GetItemCount(hList);

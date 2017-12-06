@@ -949,7 +949,7 @@ void deleteSelectedFiles(HWND hList)
 	struct dirEntry d;
 	UINT state;
 
-	for (i = 0;i < listViewEntrys;i++){
+	for (i = listViewEntrys - 1;i > -1;i--){
 		state = ListView_GetItemState(hList,i,LVIS_SELECTED);
 		if (!state){
 			continue;
@@ -971,6 +971,7 @@ void deleteSelectedFiles(HWND hList)
 				clearFatChain(d.cluster);
 			}
 			setDirectory(&d,entry);
+			ListView_DeleteItem(hList, i);
 		}
 
 	}

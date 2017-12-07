@@ -943,37 +943,29 @@ void enterDirectory(HWND hList,int listviewEntry)
 }
 
 /* 選択したファイルを削除する */
-void deleteSelectedFiles(HWND hList)
+void deleteSelectedFiles(HWND hList, int position)
 {
-	int i,entry;
+	int entry;
 	struct dirEntry d;
-	UINT state;
 
-	for (i = listViewEntrys - 1;i > -1;i--){
-		state = ListView_GetItemState(hList,i,LVIS_SELECTED);
-		if (!state){
-			continue;
+	entry = entryOnListView[position];
+
+	/* ディレクトリエントリを取得する。 */
+	getDirectory(&d,entry);
+
+	if (d.attr & 0x10){
+		/* ディレクトリ */
+		return;
+	}else if (d.attr & 0x08) {
+		/* ボリュームラベル */
+		return;
+	}else{
+		d.filename[0] = 0xe5;
+		if (d.cluster != 0){
+			clearFatChain(d.cluster);
 		}
-		entry = entryOnListView[i];
-
-		/* ディレクトリエントリを取得する。 */
-		getDirectory(&d,entry);
-
-		if (d.attr & 0x10){
-			/* ディレクトリ */
-			continue;
-		}else if (d.attr & 0x08) {
-			/* ボリュームラベル */
-			continue;
-		}else{
-			d.filename[0] = 0xe5;
-			if (d.cluster != 0){
-				clearFatChain(d.cluster);
-			}
-			setDirectory(&d,entry);
-			ListView_DeleteItem(hList, i);
-		}
-
+		setDirectory(&d,entry);
+		ListView_DeleteItem(hList, position);
 	}
 
 	/* ファイル削除に成功したらFATとディレクトリを書き込む。 */

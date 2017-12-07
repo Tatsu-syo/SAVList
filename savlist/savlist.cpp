@@ -173,10 +173,6 @@ BOOL InitInstance(HINSTANCE hInst,int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 {
 	RECT rc;
-	LPNMHDR nm;
-	LV_COLUMN lvcol;
-	LV_DISPINFO *lvinfo;
-	NM_LISTVIEW *pNMLV;
 	
 	switch (msg){
 		case WM_CREATE:
@@ -215,36 +211,14 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 				,TRUE);
 		break;
 		case WM_NOTIFY:
-			nm = (LPNMHDR)lp;
-			if (nm->hwndFrom == hList){
-				lvinfo = (LV_DISPINFO *)lp;
-				if (lvinfo->hdr.code == LVN_COLUMNCLICK) {
-					MessageBox(hWnd, "カラムがクリックされた", "", MB_OK);
-				} else {
-					switch (nm->code) {
-						case NM_DBLCLK:
-							selectSubDirectory();
-							break;
-						case NM_RETURN:
-							selectSubDirectory();
-							break;
-						case LVN_COLUMNCLICK:
-						default:
-							return(DefWindowProc(hWnd,msg,wp,lp));
-							break;
-					}
-				}
-			}else{
-				return(DefWindowProc(hWnd,msg,wp,lp));
-			}
-			break;
+			return notifyProc(hWnd, msg, wp, lp);
 		case WM_CLOSE:
 			cleanup();
 			DestroyWindow(hList);
 			DestroyWindow(hWnd);
 		break;
 		case WM_COMMAND:
-			CommandProc(hWnd,msg,wp,lp);
+			return CommandProc(hWnd,msg,wp,lp);
 		break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -303,11 +277,51 @@ LRESULT CommandProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 			directoryUpKey();
 			break;
 		default:
-			return(DefWindowProc(hWnd,msg,wp,lp));
+			return DefWindowProc(hWnd,msg,wp,lp);
 	}
 
 	return 0;
 }
+
+/**
+ * WM_NOTIFY処理プロセス
+ *
+ * @param hWnd 対象ウインドウハンドル
+ * @param msg ウインドウメッセージ
+ * @param wp WPARAM
+ * @param lp lparam
+ * @return 実行結果 
+ */
+LRESULT notifyProc(HWND &hWnd, UINT &msg, WPARAM &wp, LPARAM &lp)
+{
+	LPNMHDR nm;
+	LV_COLUMN lvcol;
+	LV_DISPINFO *lvinfo;
+	NM_LISTVIEW *pNMLV;
+
+	nm = (LPNMHDR)lp;
+
+	if (nm->hwndFrom == hList){
+		lvinfo = (LV_DISPINFO *)lp;
+		if (lvinfo->hdr.code == LVN_COLUMNCLICK) {
+			MessageBox(hWnd, "カラムがクリックされた", "", MB_OK);
+		} else {
+			switch (nm->code) {
+				case NM_DBLCLK:
+					selectSubDirectory();
+					break;
+				case NM_RETURN:
+					selectSubDirectory();
+					break;
+				case LVN_COLUMNCLICK:
+				default:
+					return DefWindowProc(hWnd,msg,wp,lp);
+			}
+		}
+	}
+	return 0;
+}
+
 
 // リストビューを作成する。
 HWND MakeMyList(HWND hWnd)
@@ -594,7 +608,8 @@ void extractFiles(void)
 		// リストビューの選択状態を取得する。
 		state = ListView_GetItemState(hList,i,LVIS_SELECTED);
 		if (state){
-			extractFile(buf,i);
+			// TODO:リストビューの位置からエントリの位置に直す処理が入る。
+			extractFile(buf, i);
 		}
 		ListView_SetItemState(hList,i,0,LVIS_SELECTED);
 	}
@@ -674,7 +689,14 @@ void queryDeleteFiles(void)
 			}
 		}
 
-		deleteSelectedFiles(hList);
+		for (int i = listViewEntrys - 1;i > -1;i--){
+			UINT state = ListView_GetItemState(hList,i, LVIS_SELECTED);
+			if (!state){
+				continue;
+			}
+			// TODO:リストビューの位置からエントリの位置に直す処理が入る。
+			deleteSelectedFiles(hList, i);
+		}
 
 		// ステータスバーを更新する。
 		setStatusBarInfo();
@@ -746,6 +768,7 @@ void selectSubDirectory(void)
 	count = ListView_GetItemCount(hList);
 	for (i = 0;i < count;i++){
 		// リストビューの選択状態を取得する。
+		// TODO:リストビューの位置からエントリの位置に直す処理が入る。
 		state = ListView_GetItemState(hList,i,LVIS_SELECTED);
 		if (state){
 			ListView_SetItemState(hList,i,0,LVIS_SELECTED);

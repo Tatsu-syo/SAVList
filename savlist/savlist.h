@@ -5,6 +5,7 @@ LRESULT CALLBACK WndProc(HWND,UINT,WPARAM,LPARAM);
 ATOM InitApp(HINSTANCE);
 BOOL InitInstance(HINSTANCE,int);
 LRESULT CommandProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp);
+LRESULT notifyProc(HWND &hWnd, UINT &msg, WPARAM &wp, LPARAM &lp);
 
 HWND MakeMyList(HWND);
 void InsertMyColumn(HWND);

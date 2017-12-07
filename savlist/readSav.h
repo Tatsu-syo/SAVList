@@ -24,7 +24,7 @@ void refreshDir(HWND hList);
 void selectAllFiles(HWND hList);
 int upDirectory(HWND hList);
 void enterDirectory(HWND hList,int listviewEntry);
-void deleteSelectedFiles(HWND hList);
+void deleteSelectedFiles(HWND hList, int position);
 void deleteLongFilename(HWND hList);
 void setTimeStamp(struct dirEntry *d, char *filename);
 

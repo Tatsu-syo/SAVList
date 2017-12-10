@@ -1,5 +1,5 @@
 /*
-file2sav (C) 2005 Tatsuhiko Shoji
+file2sav (C) 2005,2017 Tatsuhiko Shoji
 The sources for file2sav are distributed under the MIT open source license
 */
 #include	<stdio.h>
@@ -173,13 +173,16 @@ int setupDirectory(struct dirEntry *d,char *filename)
 		// I don't understand summertime.
 		// If adjustment is incorrect, please fix it.
 
-		int bias;
+		long long bias;
 		unsigned long long withBias;
 
-		withBias = localFileTime.dwLowDateTime + localFileTime.dwHighDateTime << 32;
+		withBias = localFileTime.dwHighDateTime;
+		withBias = withBias << 32;
+		withBias += localFileTime.dwLowDateTime;
 
 		bias = timeZoneInfo.DaylightBias;
-		withBias += (bias * 100 * 1000000000 * 60);
+		
+		withBias += (bias * 60 * 10000000);
 		localFileTime.dwHighDateTime = withBias >> 32;
 		localFileTime.dwLowDateTime = withBias & 0xffffffff;
 	}
@@ -585,7 +588,7 @@ int main(int argc,char *argv[])
 	int result,i;
 	
 	if (argc < 3){
-		fprintf(stderr,"file2sav Version 1.02\nBy Tatsuhiko Syoji(Tatsu) 2003-2005\n\nUsage:file2sav sav_file transfer_file ...\n");
+		fprintf(stderr,"file2sav Version 1.03\nBy Tatsuhiko Syoji(Tatsu) 2003-2005,2017\n\nUsage:file2sav sav_file transfer_file ...\n");
 		return 1;
 	}
 

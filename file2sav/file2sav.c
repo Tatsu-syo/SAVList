@@ -128,6 +128,9 @@ int setupDirectory(struct dirEntry *d,char *filename)
 	unsigned short time,date;
 	int i;
 	char name[_MAX_FNAME],ext[_MAX_EXT];
+	FILETIME localFileTime;
+	TIME_ZONE_INFORMATION timeZoneInfo;
+	DWORD timezoneStatus;
 
 	/* ファイルの情報を得る。 */
 	hFind = FindFirstFile(filename,&info);
@@ -156,7 +159,32 @@ int setupDirectory(struct dirEntry *d,char *filename)
 
 	/* ファイルの情報をディレクトリに設定していく。 */
 	/* タイムスタンプ */
-	FileTimeToDosDateTime(&(info.ftLastWriteTime),&date,&time);
+	FileTimeToLocalFileTime(&(info.ftLastWriteTime), &localFileTime);
+
+	/* On daylight saving time season, FileTimeToLocalFileTime applies
+	   unneeded daylight bias.
+
+	*/
+	timezoneStatus = GetTimeZoneInformation(&timeZoneInfo);
+	if (timezoneStatus == TIME_ZONE_ID_DAYLIGHT) {
+		// Adjust a localFileTime daylight bias.
+		// Because FileTimeToLocalFileTime treats daylight saving time.
+
+		// I don't understand summertime.
+		// If adjustment is incorrect, please fix it.
+
+		int bias;
+		unsigned long long withBias;
+
+		withBias = localFileTime.dwLowDateTime + localFileTime.dwHighDateTime << 32;
+
+		bias = timeZoneInfo.DaylightBias;
+		withBias += (bias * 100 * 1000000000 * 60);
+		localFileTime.dwHighDateTime = withBias >> 32;
+		localFileTime.dwLowDateTime = withBias & 0xffffffff;
+	}
+
+	FileTimeToDosDateTime(&localFileTime,&date,&time);
 
 	d->time = time;
 	d->date = date;

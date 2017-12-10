@@ -187,13 +187,16 @@ int setupDirectory(struct dirEntry *d,char *filename)
 		// I don't understand summertime.
 		// If adjustment is incorrect, please fix it.
 
-		int bias;
+		long long bias;
 		unsigned long long withBias;
 
-		withBias = localFileTime.dwLowDateTime + localFileTime.dwHighDateTime << 32;
+		withBias = localFileTime.dwHighDateTime;
+		withBias = withBias << 32;
+		withBias += localFileTime.dwLowDateTime;
 
 		bias = timeZoneInfo.DaylightBias;
-		withBias += (bias * 100 * 1000000000 * 60);
+		
+		withBias += (bias * 60 * 10000000);
 		localFileTime.dwHighDateTime = withBias >> 32;
 		localFileTime.dwLowDateTime = withBias & 0xffffffff;
 	}
@@ -594,13 +597,15 @@ void setTimeStamp(struct dirEntry *d, char *filename)
 		// I don't understand summertime.
 		// If adjustment is incorrect, please fix it.
 
-		int bias;
+		long long bias;
 		unsigned long long withBias;
 
-		withBias = winFileTime.dwLowDateTime + winFileTime.dwHighDateTime << 32;
+		withBias = winFileTime.dwHighDateTime;
+		withBias = withBias << 32;
+		withBias += winFileTime.dwLowDateTime;
 
 		bias = timeZoneInfo.DaylightBias;
-		withBias -= (bias * 100 * 1000000000 * 60);
+		withBias -= (bias * 60 * 10000000);
 		winFileTime.dwHighDateTime = withBias >> 32;
 		winFileTime.dwLowDateTime = withBias & 0xffffffff;
 	}

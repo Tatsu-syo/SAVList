@@ -175,10 +175,14 @@ int setupDirectory(struct dirEntry *d,char *filename)
 	/* éûç∑Ç™Ç†ÇÈÇ∆Ç´ÇÃèàóù */
 	FileTimeToLocalFileTime(&(info.ftLastWriteTime), &localFileTime);
 
+	/* On daylight saving time season, FileTimeToLocalFileTime applies
+	   unneeded daylight bias.
+
+	*/
 	timezoneStatus = GetTimeZoneInformation(&timeZoneInfo);
 	if (timezoneStatus == TIME_ZONE_ID_DAYLIGHT) {
-		// Adjust localFileTime with daylight bias.
-		// Because FileTimeToLocalFileTime treats summertime.
+		// Adjust a localFileTime daylight bias.
+		// Because FileTimeToLocalFileTime treats daylight saving time.
 
 		// I don't understand summertime.
 		// If adjustment is incorrect, please fix it.
@@ -188,8 +192,8 @@ int setupDirectory(struct dirEntry *d,char *filename)
 
 		withBias = localFileTime.dwLowDateTime + localFileTime.dwHighDateTime << 32;
 
-		bias = -(timeZoneInfo.DaylightBias);
-		withBias -= (bias * 100 * 1000000000 * 60);
+		bias = timeZoneInfo.DaylightBias;
+		withBias += (bias * 100 * 1000000000 * 60);
 		localFileTime.dwHighDateTime = withBias >> 32;
 		localFileTime.dwLowDateTime = withBias & 0xffffffff;
 	}
@@ -560,9 +564,11 @@ int extractFile(char *dir,int listviewEntry)
 void setTimeStamp(struct dirEntry *d, char *filename)
 {
 	HANDLE hFile;
-	FILETIME fileTime;
+	FILETIME dosFileTime;
 	SYSTEMTIME sysTime;
-	FILETIME localFileTime;
+	FILETIME winFileTime;
+	TIME_ZONE_INFORMATION timeZoneInfo;
+	DWORD timezoneStatus;
 
 	memset(&sysTime, 0,sizeof(SYSTEMTIME));
 
@@ -576,11 +582,30 @@ void setTimeStamp(struct dirEntry *d, char *filename)
 	if (hFile == INVALID_HANDLE_VALUE) {
 		return;
 	}
-	DosDateTimeToFileTime(d->date, d->time, &fileTime);
-	
-	LocalFileTimeToFileTime(&fileTime, &localFileTime);
+	DosDateTimeToFileTime(d->date, d->time, &dosFileTime);
 
-	SetFileTime(hFile, NULL, NULL, &localFileTime);
+	LocalFileTimeToFileTime(&dosFileTime, &winFileTime);
+
+	timezoneStatus = GetTimeZoneInformation(&timeZoneInfo);
+	if (timezoneStatus == TIME_ZONE_ID_DAYLIGHT) {
+		// Adjust a winFileTime daylight bias.
+		// Because FileTimeToLocalFileTime treats daylight saving time.
+
+		// I don't understand summertime.
+		// If adjustment is incorrect, please fix it.
+
+		int bias;
+		unsigned long long withBias;
+
+		withBias = winFileTime.dwLowDateTime + winFileTime.dwHighDateTime << 32;
+
+		bias = timeZoneInfo.DaylightBias;
+		withBias -= (bias * 100 * 1000000000 * 60);
+		winFileTime.dwHighDateTime = withBias >> 32;
+		winFileTime.dwLowDateTime = withBias & 0xffffffff;
+	}
+
+	SetFileTime(hFile, NULL, NULL, &winFileTime);
 	CloseHandle(hFile);
 
 }

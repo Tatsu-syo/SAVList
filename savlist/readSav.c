@@ -1,5 +1,5 @@
 /*
-SAVList (C) 2005 Tatsuhiko Shoji
+SAVList (C) 2005,2017 Tatsuhiko Shoji
 The sources for SAVList are distributed under the MIT open source license
 */
 #include	<stdio.h>

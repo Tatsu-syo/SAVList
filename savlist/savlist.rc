@@ -83,8 +83,8 @@ IDI_ICON1          ICON           "icon1.ico"
 //
 LANGUAGE LANG_JAPANESE, SUBLANG_SYS_DEFAULT
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION     1,0,1,0
-    PRODUCTVERSION  1,0,1,0
+    FILEVERSION     1,0,2,0
+    PRODUCTVERSION  1,0,2,0
     FILEOS          VOS__WINDOWS32
     FILETYPE        VFT_APP
     FILESUBTYPE     VFT2_UNKNOWN
@@ -105,7 +105,7 @@ VS_VERSION_INFO VERSIONINFO
             VALUE "LegalCopyright", "Copyright (C) 2003-2005,2017 Tatsu"
             VALUE "OriginalFilename", "savlist.exe"
             VALUE "ProductName", "SavList"
-            VALUE "ProductVersion", "1, 0, 1, 0"
+            VALUE "ProductVersion", "1, 0, 2, 0"
         }
     }
     BLOCK "VarFileInfo"

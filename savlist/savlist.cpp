@@ -294,32 +294,29 @@ LRESULT CommandProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
  */
 LRESULT notifyProc(HWND &hWnd, UINT &msg, WPARAM &wp, LPARAM &lp)
 {
-	LPNMHDR nm;
-	LV_COLUMN lvcol;
+	LPNMHDR nmhdr;
 	LV_DISPINFO *lvinfo;
 	NM_LISTVIEW *pNMLV;
 
-	nm = (LPNMHDR)lp;
+	nmhdr = (LPNMHDR)lp;
 
-	if (nm->hwndFrom == hList){
+	if (nmhdr->hwndFrom == hList){
 		lvinfo = (LV_DISPINFO *)lp;
-		if (lvinfo->hdr.code == LVN_COLUMNCLICK) {
-			// MessageBox(hWnd, "カラムがクリックされた", "", MB_OK);
-			pNMLV = (NM_LISTVIEW *)lp;
-			sortStartFlag = 1;
-			ListView_SortItems(hList, compareItem, pNMLV->iSubItem);
-		} else {
-			switch (nm->code) {
-				case NM_DBLCLK:
-					selectSubDirectory();
-					break;
-				case NM_RETURN:
-					selectSubDirectory();
-					break;
-				case LVN_COLUMNCLICK:
-				default:
-					return DefWindowProc(hWnd,msg,wp,lp);
-			}
+		switch (lvinfo->hdr.code) {
+			case LVN_COLUMNCLICK:
+				/* カラムがクリックされた時のソート処理 */
+				pNMLV = (NM_LISTVIEW *)lp;
+				sortStartFlag = 1;
+				ListView_SortItems(hList, compareItem, pNMLV->iSubItem);
+				break;
+			case NM_DBLCLK:
+				selectSubDirectory();
+				break;
+			case NM_RETURN:
+				selectSubDirectory();
+				break;
+			default:
+				return DefWindowProc(hWnd,msg,wp,lp);
 		}
 		return 0;
 	}

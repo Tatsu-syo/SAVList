@@ -19,6 +19,8 @@ int listViewEntrys;
 int directoryEntrys;	/* ディレクトリエントリ数 */
 int isSubDirectory = 0;
 unsigned long fs_startCluster;
+static int sortDirection[5];
+int sortStartFlag = 0;
 
 /* 仮想フロッピーファイルに情報を書き戻す。 */
 int flushSavfile(void)
@@ -124,6 +126,25 @@ void cleanup(void)
 		entryOnListView = NULL;
 	}
 }
+
+/**
+ * リストビュー上の位置をディレクトリエントリ上の位置に変換する。
+ *
+ * @param listPos リストビュー上の位置
+ * @return ディレクトリエントリ上の位置
+ */
+int listPosToEntryPos(int listPos)
+{
+	LVITEM item1;
+
+	item1.iItem = listPos;
+	item1.iSubItem = 0;
+	item1.mask = LVIF_PARAM;
+	ListView_GetItem(hList, &item1);
+
+	return item1.lParam;
+}
+
 
 /**
  * 指定されたファイルの情報をディレクトリにセットする。
@@ -491,7 +512,7 @@ int extractFile(char *dir,int listviewEntry)
 		return 1;
 
 	/* ディレクトリエントリ取得 */
-	entry = entryOnListView[listviewEntry];
+	entry = listPosToEntryPos(listviewEntry);
 	getDirectory(&d,entry);
 
 	/* パス名生成 */
@@ -767,6 +788,10 @@ void refreshDir(HWND hList)
 	memset(&item,0,sizeof(LV_ITEM));
 	ListView_DeleteAllItems(hList);
 
+	for (i = 0; i < 5;i++) {
+		sortDirection[i] = SORT_UNKNOWN;
+	}
+	
 	pos = 0;
 	for (i = 0;i < directoryEntrys;i++){
 		item.mask = LVIF_TEXT;
@@ -798,6 +823,8 @@ void refreshDir(HWND hList)
 		item.pszText = buf;
 		item.iItem = pos;
 		item.iSubItem = 0;
+		item.lParam = i;
+		item.mask = LVIF_TEXT | LVIF_PARAM;
 		ListView_InsertItem(hList,&item);
 
 		/* ファイル名 */
@@ -807,6 +834,7 @@ void refreshDir(HWND hList)
 		item.pszText = buf;
 		item.iItem = pos;
 		item.iSubItem = 1;
+		item.mask = LVIF_TEXT;
 		ListView_SetItem(hList,&item);
 
 		memset(buf,0x00,32);
@@ -819,6 +847,7 @@ void refreshDir(HWND hList)
 		item.pszText = buf;
 		item.iItem = pos;
 		item.iSubItem = 2;
+		item.mask = LVIF_TEXT;
 		ListView_SetItem(hList,&item);
 
 
@@ -835,6 +864,7 @@ void refreshDir(HWND hList)
 		item.pszText = buf;
 		item.iItem = pos;
 		item.iSubItem = 3;
+		item.mask = LVIF_TEXT;
 		ListView_SetItem(hList,&item);
 
 		/* 更新時刻 */
@@ -849,6 +879,7 @@ void refreshDir(HWND hList)
 		item.pszText = buf;
 		item.iItem = pos;
 		item.iSubItem = 4;
+		item.mask = LVIF_TEXT;
 		ListView_SetItem(hList,&item);
 
 		pos++;
@@ -955,7 +986,7 @@ void enterDirectory(HWND hList,int listviewEntry)
 		return;
 
 	/* ディレクトリエントリ取得 */
-	entry = entryOnListView[listviewEntry];
+	entry = listPosToEntryPos(listviewEntry);
 	getDirectory(&d,entry);
 
 	if (d.attr & 0x10){
@@ -978,7 +1009,7 @@ void deleteSelectedFiles(HWND hList, int position)
 	int entry;
 	struct dirEntry d;
 
-	entry = entryOnListView[position];
+	entry = listPosToEntryPos(position);
 
 	/* ディレクトリエントリを取得する。 */
 	getDirectory(&d,entry);
@@ -1036,3 +1067,139 @@ void deleteLongFilename(HWND hList)
 
 }
 
+/**
+ * リストビューソートのための比較関数
+ *
+ * @param lp1 比較対象1(リストビュー内部値)
+ * @param lp2 比較対象2(リストビュー内部値)
+ * @param lp3 比較対象列
+ * @return <0:lp1の項目が前 0:同じ位置 >0:lp2の項目が前
+ */
+int CALLBACK compareItem(LPARAM lp1, LPARAM lp2, LPARAM lp3)
+{
+	int target1;
+	int target2;
+	int targetItem;
+	int listCount;
+	LVITEM item1;
+	LVITEM item2;
+	struct dirEntry dir1;
+	struct dirEntry dir2;
+	char disp1[32];
+	char disp2[32];
+	int direction;
+	LV_FINDINFO findInfo;
+
+	listCount = ListView_GetItemCount(hList);
+
+	/* リストビュー内部値を実際の並びに直す */
+	findInfo.flags = LVFI_PARAM;
+	findInfo.lParam = lp1;
+	target1 = ListView_FindItem(hList, -1, &findInfo);
+
+	findInfo.flags = LVFI_PARAM;
+	findInfo.lParam = lp2;
+	target2 = ListView_FindItem(hList, -1, &findInfo);
+
+	targetItem = (int)lp3;
+
+	if (target1 >= listCount) {
+		if (target2 < listCount) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+	if (target2 >= listCount) {
+		if (target1 < listCount) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	/* ソート方向の設定 */
+	if (sortStartFlag) {
+		if (sortDirection[targetItem] == SORT_UP) {
+			sortDirection[targetItem] = SORT_DOWN;
+		} else {
+			sortDirection[targetItem] = SORT_UP;
+		}
+		sortStartFlag = 0;
+	}
+
+	/* 比較対象値の取得 */
+	item1.iItem = target1;
+	item1.iSubItem = targetItem;
+	item1.mask = LVIF_TEXT | LVIF_PARAM;
+	item1.pszText = disp1;
+	item1.cchTextMax = 32;
+	ListView_GetItem(hList, &item1);
+
+	item2.iItem = target2;
+	item2.iSubItem = targetItem;
+	item2.mask = LVIF_TEXT | LVIF_PARAM;
+	item2.pszText = disp2;
+	item2.cchTextMax = 32;
+	ListView_GetItem(hList, &item2);
+
+	getDirectory(&dir1, item1.lParam);
+	getDirectory(&dir2, item2.lParam);
+
+	/* 比較実施 */
+	switch (targetItem) {
+		case 0:
+			/* エントリ準 */
+			direction = atoi(disp2) - atoi(disp1);
+			break;
+		case 3:
+			/* ファイルサイズ(ボリュームラベル、ディレクトリ優先) */
+			if (dir1.attr & 0x08) {
+				if (dir2.attr & 0x08) {
+					return 0;
+				} else {
+					direction = -1;
+				}
+			} else if (dir2.attr & 0x08) {
+				if (dir1.attr & 0x08) {
+					return 0;
+				} else {
+					direction = 1;
+				}
+			} else if (dir1.attr & 0x10) {
+				if (dir2.attr & 0x10) {
+					return 0;
+				} else {
+					direction = -1;
+				}
+			} else if (dir2.attr & 0x10) {
+				if (dir1.attr & 0x10) {
+					return 0;
+				} else {
+					direction = 1;
+				}
+			} else {
+				if (dir1.size < dir2.size) {
+					direction = -1;
+				} else if (dir1.size == dir2.size) {
+					direction = 0;
+				} else {
+					direction = 1;
+				}
+			}
+			break;
+		default:
+			direction = strcmp(disp1, disp2);
+			break;
+	}
+	if (targetItem != 3) {
+	} else {
+	}
+
+	/* 昇順・降順の切り替え */
+	if (sortDirection[targetItem] == SORT_DOWN) {
+		return -direction;
+	} else {
+		return direction;
+	}
+}

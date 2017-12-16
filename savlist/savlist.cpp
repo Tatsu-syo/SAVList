@@ -304,7 +304,10 @@ LRESULT notifyProc(HWND &hWnd, UINT &msg, WPARAM &wp, LPARAM &lp)
 	if (nm->hwndFrom == hList){
 		lvinfo = (LV_DISPINFO *)lp;
 		if (lvinfo->hdr.code == LVN_COLUMNCLICK) {
-			MessageBox(hWnd, "カラムがクリックされた", "", MB_OK);
+			// MessageBox(hWnd, "カラムがクリックされた", "", MB_OK);
+			pNMLV = (NM_LISTVIEW *)lp;
+			sortStartFlag = 1;
+			ListView_SortItems(hList, compareItem, pNMLV->iSubItem);
 		} else {
 			switch (nm->code) {
 				case NM_DBLCLK:
@@ -318,8 +321,9 @@ LRESULT notifyProc(HWND &hWnd, UINT &msg, WPARAM &wp, LPARAM &lp)
 					return DefWindowProc(hWnd,msg,wp,lp);
 			}
 		}
+		return 0;
 	}
-	return 0;
+	return DefWindowProc(hWnd,msg,wp,lp);
 }
 
 
@@ -332,7 +336,8 @@ HWND MakeMyList(HWND hWnd)
 	
 	/* リストビューを作る */
 	hList = CreateWindowEx(0,WC_LISTVIEW,"",
-		WS_CHILD | WS_VISIBLE | LVS_REPORT | WS_EX_CLIENTEDGE | LVS_NOSORTHEADER ,0,0,0,0,
+		WS_CHILD | WS_VISIBLE | LVS_REPORT,
+		0, 0, 0, 0,
 		hWnd,(HMENU)100,hInst,NULL);
 	style = GetWindowLong(hList,GWL_STYLE);
 	if (style & LVS_EDITLABELS){

@@ -14,6 +14,11 @@ extern "C" {
 #define NO_DISKSPACE 2
 #define NO_ENTRY 3
 
+#define SORT_UNKNOWN 0
+#define SORT_UP 1
+#define SORT_DOWN 2
+
+int listPosToEntryPos(int listPos);
 int writeFile(char *filename);
 int extractFile(char *dir,int listviewEntry);
 void cleanup(void);
@@ -27,6 +32,7 @@ void enterDirectory(HWND hList,int listviewEntry);
 void deleteSelectedFiles(HWND hList, int position);
 void deleteLongFilename(HWND hList);
 void setTimeStamp(struct dirEntry *d, char *filename);
+int CALLBACK compareItem(LPARAM lp1, LPARAM lp2, LPARAM lp3);
 
 struct SavStatus {
 	unsigned long files;
@@ -36,6 +42,8 @@ struct SavStatus {
 };
 
 extern int listViewEntrys;
+extern HWND hList;
+extern int sortStartFlag;
 
 #ifdef __cplusplus
 }

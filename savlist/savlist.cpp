@@ -157,6 +157,9 @@ BOOL InitInstance(HINSTANCE hInst,int nCmdShow)
 	ShowWindow(hWnd,nCmdShow);
 	UpdateWindow(hWnd);
 	hWndMain = hWnd;	// メインウインドウのハンドルを保存する。
+
+	// ファイルのドロップを受けられるようにする
+	DragAcceptFiles(hWnd, TRUE);
 	
 	return TRUE;
 }
@@ -220,6 +223,10 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 		case WM_COMMAND:
 			return CommandProc(hWnd,msg,wp,lp);
 		break;
+		case WM_DROPFILES:
+			// ファイルがドロップされた
+			onDropFiles(wp);
+			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
 		break;
@@ -324,7 +331,12 @@ LRESULT notifyProc(HWND &hWnd, UINT &msg, WPARAM &wp, LPARAM &lp)
 }
 
 
-// リストビューを作成する。
+/**
+ * リストビューを作成する。
+ *
+ * @param 親ウインドウのハンドル
+ * @return リストビューのハンドル
+ */
 HWND MakeMyList(HWND hWnd)
 {
 	HWND hList;
@@ -344,7 +356,7 @@ HWND MakeMyList(HWND hWnd)
 	dwStyle = ListView_GetExtendedListViewStyle(hList);
 	dwStyle |= LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_HEADERDRAGDROP;	// | LVS_EX_CHECKBOXES;
 	ListView_SetExtendedListViewStyle(hList,dwStyle);
-	
+
 	/* ついでにステータスバーも作る。 */
 	hStatus = CreateWindowEx(0,STATUSCLASSNAME,NULL,WS_CHILD | WS_VISIBLE | CCS_BOTTOM,
 		0,0,0,0,hWnd,(HMENU)39999,hInst,NULL);
@@ -806,6 +818,43 @@ void directoryUpKey(void)
 	}
 	
 }
+
+/**
+ * ファイルドロップ時の動作
+ *
+ * @param wp ファイルドロップにより渡されたWPARAM
+ */
+void onDropFiles(WPARAM wp)
+{
+	HDROP hDrop;
+	int dropFiles;
+	int i;
+	char filePath[MAX_PATH];
+	int result;
+
+	hDrop = (HDROP)wp;
+
+	dropFiles = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
+	for (i = 0; i < dropFiles; i++) {
+		DragQueryFile(hDrop, i, filePath, MAX_PATH);
+
+		result = writeFile(filePath);
+		if (result){
+			putTransferErrorMessage(result);
+			break;
+		}
+
+	}
+
+	// ステータスバーを更新する。
+	setStatusBarInfo();
+	// ディレクトリを再表示する。
+	refreshDir(hList);
+	UpdateWindow(hList);
+	UpdateWindow(hStatus);
+
+}
+
 
 /* ステータスバーに情報を設定する。 */
 void setStatusBarInfo(void)

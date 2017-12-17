@@ -24,6 +24,7 @@ void queryDeleteFiles(void);
 void queryLFNKill(void);
 void directoryUpKey(void);
 void selectSubDirectory(void);
+void onDropFiles(WPARAM wp);
 void setStatusBarInfo(void);
 void displayHelpFile(void);
 void versionDialog(void);

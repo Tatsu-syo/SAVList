@@ -30,7 +30,7 @@ HWND hWndMain;	// メインウインドウのハンドル
 HWND hList;	// リスト部分のハンドル
 HWND hStatus;	// ステータスバーのウインドウハンドル
 HINSTANCE hInst;	// インスタンスハンドル
-bool readFlag = false;
+bool readFlag = false;	// 仮想フロッピーディスクファイルをロードしたか？
 char *inoutDir;	// ファイル転送・取り出しディレクトリの起点
 char *savDir;	// 仮想フロッピーディスクファイル選択の起点
 
@@ -831,6 +831,7 @@ void onDropFiles(WPARAM wp)
 	int i;
 	char filePath[MAX_PATH];
 	int result;
+	char fileExt[_MAX_EXT];
 
 	hDrop = (HDROP)wp;
 
@@ -838,12 +839,24 @@ void onDropFiles(WPARAM wp)
 	for (i = 0; i < dropFiles; i++) {
 		DragQueryFile(hDrop, i, filePath, MAX_PATH);
 
-		result = writeFile(filePath);
-		if (result){
-			putTransferErrorMessage(result);
+		if (readFlag) {
+			// 読み込み済みの場合はSAVファイルへの転送とする。
+			result = writeFile(filePath);
+			if (result){
+				putTransferErrorMessage(result);
+				break;
+			}
+		} else {
+			if (strlen(filePath) < 4) {
+				return;
+			}
+			_splitpath(filePath, NULL, NULL, NULL, fileExt);
+			if (_stricmp(".sav", fileExt)) {
+				return;
+			}
+			openSavFile(filePath);
 			break;
 		}
-
 	}
 
 	// ステータスバーを更新する。

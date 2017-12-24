@@ -774,7 +774,7 @@ int readSavFile(char *filename)
 /* ディレクトリを再表示する */
 void refreshDir(HWND hList)
 {
-	int i,pos;
+	int i,pos,j;
 	LV_ITEM item;
 	char buf[32];
 	struct dirEntry d;
@@ -830,6 +830,15 @@ void refreshDir(HWND hList)
 		/* ファイル名 */
 		memset(buf,0x00,32);
 		memcpy(buf,d.filename,8);
+		if (1 && (d.ext[0] != ' ')) {
+			/* 拡張子を付ける場合 */
+			for (j = 0; ((buf[j] != '\0') && (buf[j] != ' ')); j++) {
+				/* Do nothing. */
+			}
+			buf[j] = '.';
+			j++;
+			memcpy(buf + j,d.ext,3);
+		}
 
 		item.pszText = buf;
 		item.iItem = pos;
@@ -837,6 +846,7 @@ void refreshDir(HWND hList)
 		item.mask = LVIF_TEXT;
 		ListView_SetItem(hList,&item);
 
+		/* 拡張子 */
 		memset(buf,0x00,32);
 		if (d.ext[0] != ' '){
 			buf[0] = '.';

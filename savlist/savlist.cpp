@@ -33,6 +33,7 @@ HINSTANCE hInst;	// インスタンスハンドル
 bool readFlag = false;	// 仮想フロッピーディスクファイルをロードしたか？
 char *inoutDir;	// ファイル転送・取り出しディレクトリの起点
 char *savDir;	// 仮想フロッピーディスクファイル選択の起点
+int sortKey = -1;	// ソートするキー
 
 /**
  * メインルーチン
@@ -283,6 +284,10 @@ LRESULT CommandProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 			refreshFilesDisp(hList);
 			break;
 		case IDM_FULL_SORT:
+			menuHandle = GetMenu(hWndMain);
+			fullSort = 1 - fullSort;
+			checkMenuItem(menuHandle, IDM_FULL_SORT, fullSort);
+			ListView_SortItems(hList, compareItem, sortKey);
 			break;
 		case IDM_HELP:
 			displayHelpFile();
@@ -323,8 +328,9 @@ LRESULT notifyProc(HWND &hWnd, UINT &msg, WPARAM &wp, LPARAM &lp)
 			case LVN_COLUMNCLICK:
 				/* カラムがクリックされた時のソート処理 */
 				pNMLV = (NM_LISTVIEW *)lp;
-				sortStartFlag = 1;
-				ListView_SortItems(hList, compareItem, pNMLV->iSubItem);
+				sortKey = pNMLV->iSubItem;
+				reverseSortDirection(sortKey);
+				ListView_SortItems(hList, compareItem, sortKey);
 				break;
 			case NM_DBLCLK:
 				selectSubDirectory();

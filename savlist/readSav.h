@@ -33,6 +33,7 @@ void deleteSelectedFiles(HWND hList, int position);
 void deleteLongFilename(HWND hList);
 void setTimeStamp(struct dirEntry *d, char *filename);
 void refreshFilesDisp(HWND hList);
+void reverseSortDirection(int key);
 int CALLBACK compareItem(LPARAM lp1, LPARAM lp2, LPARAM lp3);
 
 struct SavStatus {
@@ -44,7 +45,6 @@ struct SavStatus {
 
 extern int listViewEntrys;
 extern HWND hList;
-extern int sortStartFlag;
 extern int addExt;
 extern int fullSort;
 

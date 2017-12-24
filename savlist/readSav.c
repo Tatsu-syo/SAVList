@@ -20,7 +20,6 @@ int directoryEntrys;	/* ディレクトリエントリ数 */
 int isSubDirectory = 0;
 unsigned long fs_startCluster;
 static int sortDirection[5];
-int sortStartFlag = 0;
 /* ファイル名欄に拡張子をつけるか */
 int addExt = 1;
 int fullSort = 0;
@@ -1137,6 +1136,21 @@ void refreshFilesDisp(HWND hList)
 
 }
 
+/**
+ * ソートするキーの向きを反転させる。
+ *
+ * @param key ソートするキー
+ */
+void reverseSortDirection(int key)
+{
+	/* ソート方向の設定 */
+	if (sortDirection[key] == SORT_UP) {
+		sortDirection[key] = SORT_DOWN;
+	} else {
+		sortDirection[key] = SORT_UP;
+	}
+
+}
 
 /**
  * リストビューソートのための比較関数
@@ -1189,16 +1203,6 @@ int CALLBACK compareItem(LPARAM lp1, LPARAM lp2, LPARAM lp3)
 		}
 	}
 
-	/* ソート方向の設定 */
-	if (sortStartFlag) {
-		if (sortDirection[targetItem] == SORT_UP) {
-			sortDirection[targetItem] = SORT_DOWN;
-		} else {
-			sortDirection[targetItem] = SORT_UP;
-		}
-		sortStartFlag = 0;
-	}
-
 	/* 比較対象値の取得 */
 	item1.iItem = target1;
 	item1.iSubItem = targetItem;
@@ -1222,6 +1226,15 @@ int CALLBACK compareItem(LPARAM lp1, LPARAM lp2, LPARAM lp3)
 		case 0:
 			/* エントリ準 */
 			direction = atoi(disp2) - atoi(disp1);
+			break;
+		case 1:
+			if (!fullSort) {
+				direction = memcmp(dir1.filename, dir2.filename, 8);
+			} else {
+				makeDispFilename(disp1, &dir1);
+				makeDispFilename(disp2, &dir2);
+				direction = strcmp(disp1, disp2);
+			}
 			break;
 		case 3:
 			/* ファイルサイズ(ボリュームラベル、ディレクトリ優先) */

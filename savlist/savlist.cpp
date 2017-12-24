@@ -247,6 +247,8 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
  */
 LRESULT CommandProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 {
+	HMENU menuHandle;
+
 	switch(LOWORD(wp)){
 		case IDM_OPEN:
 			openSavFileSelect();
@@ -273,6 +275,14 @@ LRESULT CommandProc(HWND hWnd,UINT msg,WPARAM wp,LPARAM lp)
 			break;
 		case IDM_LFNKILL:
 			queryLFNKill();
+			break;
+		case IDM_DISP_EXT:
+			menuHandle = GetMenu(hWndMain);
+			addExt = 1 - addExt;
+			checkMenuItem(menuHandle, IDM_DISP_EXT, addExt);
+			refreshFilesDisp(hList);
+			break;
+		case IDM_FULL_SORT:
 			break;
 		case IDM_HELP:
 			displayHelpFile();
@@ -397,6 +407,32 @@ void InsertMyColumn(HWND hList)
 	ListView_InsertColumn(hList,4,&lvcol);
 	
 	return;
+}
+
+/**
+ * メニューのチェック状態を設定する。
+ *
+ * @param menuHandle メニューハンドル
+ * @param id メニューID
+ * @param true:チェックする false:チェックしない
+ */
+void checkMenuItem(HMENU menuHandle, int id, int checked)
+{
+	 MENUITEMINFO info;
+
+	 memset(&info, 0, sizeof(MENUITEMINFO));
+	 info.cbSize = sizeof(MENUITEMINFO);
+	 info.fMask = MIIM_STATE;
+
+	 GetMenuItemInfo(menuHandle, id, FALSE, &info);
+	 if (checked) {
+		 info.fState |= MFS_CHECKED;
+	 } else {
+		 if (info.fState & MFS_CHECKED) {
+			info.fState ^= MFS_CHECKED;
+		 }
+	 }
+	 SetMenuItemInfo(menuHandle, id, FALSE, &info);
 }
 
 /**

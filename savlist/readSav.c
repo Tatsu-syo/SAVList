@@ -21,6 +21,9 @@ int isSubDirectory = 0;
 unsigned long fs_startCluster;
 static int sortDirection[5];
 int sortStartFlag = 0;
+/* ファイル名欄に拡張子をつけるか */
+int addExt = 1;
+int fullSort = 0;
 
 /* 仮想フロッピーファイルに情報を書き戻す。 */
 int flushSavfile(void)
@@ -771,10 +774,33 @@ int readSavFile(char *filename)
 /* この先はGUI連携用関数 */
 /*-----------------------*/
 
+/**
+ * 表示用ファイル名を作成する
+ *
+ * @param buf 表示用バッファ
+ * @param d 表示用ディレクトリエントリ
+ */
+void makeDispFilename(char *buf, struct dirEntry *d)
+{
+	int j;
+
+	memset(buf,0x00,32);
+	memcpy(buf,d->filename,8);
+	if (addExt && (d->ext[0] != ' ')) {
+		/* 拡張子を付ける場合 */
+		for (j = 0; ((buf[j] != '\0') && (buf[j] != ' ')); j++) {
+			/* Do nothing. */
+		}
+		buf[j] = '.';
+		j++;
+		memcpy(buf + j,d->ext,3);
+	}
+}
+
 /* ディレクトリを再表示する */
 void refreshDir(HWND hList)
 {
-	int i,pos,j;
+	int i,pos;
 	LV_ITEM item;
 	char buf[32];
 	struct dirEntry d;
@@ -828,18 +854,7 @@ void refreshDir(HWND hList)
 		ListView_InsertItem(hList,&item);
 
 		/* ファイル名 */
-		memset(buf,0x00,32);
-		memcpy(buf,d.filename,8);
-		if (1 && (d.ext[0] != ' ')) {
-			/* 拡張子を付ける場合 */
-			for (j = 0; ((buf[j] != '\0') && (buf[j] != ' ')); j++) {
-				/* Do nothing. */
-			}
-			buf[j] = '.';
-			j++;
-			memcpy(buf + j,d.ext,3);
-		}
-
+		makeDispFilename(buf, &d);
 		item.pszText = buf;
 		item.iItem = pos;
 		item.iSubItem = 1;
@@ -1076,6 +1091,52 @@ void deleteLongFilename(HWND hList)
 	flushSavfile();
 
 }
+
+/**
+ * ファイル表示を更新する
+ *
+ * @param hList 更新するリストビュー
+ */
+void refreshFilesDisp(HWND hList)
+{
+	int i,pos;
+	struct dirEntry d;
+	char buf[32];
+	LV_ITEM item;
+
+	pos = 0;
+	for (i = 0;i < directoryEntrys;i++){
+		/* ディレクトリエントリを取得する。 */
+		getDirectory(&d,i);
+
+		/* ディレクトリエントリの終わりの場合表示を打ち切る。 */
+		if (d.filename[0] == 0x00){
+			break;
+		}
+
+		/* 削除されたエントリは表示しない。 */
+		if ((unsigned char)(d.filename[0]) == 0xe5){
+			continue;
+		}
+
+		/* ロングファイル名は表示しない */
+		if (d.attr == 0x0f){
+			continue;
+		}
+
+		makeDispFilename(buf, &d);
+		item.pszText = buf;
+		item.iItem = pos;
+		item.iSubItem = 1;
+		item.mask = LVIF_TEXT;
+		ListView_SetItem(hList,&item);
+
+		/* ディレクトリエントリ上の位置とリストビュー上の位置を関連付ける */
+		pos++;
+	}
+
+}
+
 
 /**
  * リストビューソートのための比較関数

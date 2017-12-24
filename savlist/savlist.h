@@ -13,6 +13,7 @@ LRESULT notifyProc(HWND &hWnd, UINT &msg, WPARAM &wp, LPARAM &lp);
 
 HWND MakeMyList(HWND);
 void InsertMyColumn(HWND);
+void checkMenuItem(HMENU menuHandle, int id, int checked);
 
 void openSavFileSelect(void);
 void openSavFile(char *filename);

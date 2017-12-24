@@ -1,7 +1,3 @@
-/*
-SAVList (C) 2005 Tatsuhiko Shoji
-The sources for SAVList are distributed under the MIT open source license
-*/
 #ifndef IDC_STATIC
 #define IDC_STATIC (-1)
 #endif
@@ -13,6 +9,8 @@ The sources for SAVList are distributed under the MIT open source license
 #define IDSUPPORT                               1001
 #define IDM_OPEN                                40000
 #define IDM_EXIT                                40001
+#define IDM_DISP_EXT                            40002
+#define IDM_FULL_SORT                           40003
 #define IDM_EXT                                 40005
 #define IDM_ADDFILE                             40006
 #define IDM_HELP                                40009

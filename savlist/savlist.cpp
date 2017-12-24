@@ -858,6 +858,7 @@ void onDropFiles(WPARAM wp)
 			break;
 		}
 	}
+	DragFinish(hDrop);
 
 	// ステータスバーを更新する。
 	setStatusBarInfo();
